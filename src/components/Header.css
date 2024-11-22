@@ -1,0 +1,130 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 15px;
+  background-color: transparent; 
+  /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);  */
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  font-size: 1.3rem;
+  color: white;
+  font-weight: bold;
+}
+
+.logo-img {
+  width: 45px;
+  height: auto;
+  margin-right: 5px;
+  padding-left: 10px;
+}
+
+nav {
+  display: flex;
+  padding: 0px 40px 20px 40px;
+}
+
+      nav ul li {
+          list-style: none;
+          padding: 0px 50px;
+          align-content: center;
+          
+      }
+      nav ul{
+        display:flex;
+        /* margin: 10px; */
+        /* margin-left: 28%; */
+        justify-content: space-between;
+        
+      }
+     
+
+      nav ul li a {
+          color: white;
+          position: absolute;
+          text-decoration: none;
+          /* justify-content: space-around; */
+        gap: 50px;  
+        position:absolute;
+      }
+      nav ul li a:hover {
+  color:white;
+  text-shadow: black 1px 2px 8px;
+  cursor: grabbing;
+  
+}
+nav ul li a:after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background:white;
+  transition: 0.2s;
+  bottom: 0;
+}
+nav ul li a:hover:after {
+  width: 100%;
+}
+
+    
+/* Auth Buttons Styling */
+.auth-buttons {
+  display: flex;
+  gap: 35px;
+  margin-right: 70px;
+  
+
+}
+.login-btn, .signup-btn {
+  border: 1px solid white;
+  padding: 8px 15px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  background-color: #7d5fff;
+  transition: all 0.3s ease;
+}
+
+.signup-btn {
+  background-color: white;
+  color: black;
+}
+
+.login-btn:hover {
+  color: black;
+  background-color: white;
+  box-shadow: #7d5fff 0px 0px 8px 4px;
+  cursor: grabbing;
+}
+
+.signup-btn:hover {
+  color: white;
+  background-color: #7d5fff;
+  box-shadow: white 0px 0px 8px 4px;
+  cursor: grabbing;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .header {
+      flex-direction: column;
+  }
+
+  nav ul {
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+      margin: 15px 0;
+  }
+
+  .auth-buttons {
+      flex-direction: column;
+      gap: 10px;
+  }
+}
