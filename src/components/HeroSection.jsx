@@ -1,11 +1,46 @@
-import React from 'react';
-import Button from './Button';
+import React ,{useState} from "react";
 import './HeroSection.css';
+import './Editor.jsx';
 import { motion } from 'framer-motion';
 import { fadeIn } from '../veriant';
+import { v4 as uuidV4 } from 'uuid';
+import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 
 const HeroSection = () => {
+  const navigate = useNavigate();
+  const [showModal1, setShowModal1]=useState(false);
+  const [showModal, setShowModal]=useState(false);
+  const [roomId, setRoomId] = useState('');
+  const [username, setUsername] = useState('');
+
+  const createNewRoom = (e) => {
+    e.preventDefault();
+    const id = uuidV4();
+    setRoomId(id);
+    toast.success('Created a new room');
+};
+
+
+const createroom = () => {
+  if (!roomId || !username) {
+      toast.error('ROOM ID & username is required');
+      return;
+  }
+  setShowModal1(false); // Close modal
+  navigate(`/editor/${roomId}`, {
+      state: { username },
+  });
+};
+
+
+const handleInputEnter = (e) => {
+  if (e.key === 'Enter') {
+      createroom();
+  }
+};
+
   return (
     <>
       <section className="hero" id="hero">
@@ -18,9 +53,96 @@ const HeroSection = () => {
           </p>
 
           <div className="hero-buttons">
-            <Button className="join-room" text="Join Room" variant="primary" />
-            <Button className="create-room" text="Create Room" variant="secondary" />
+          <button className="join-room"  onClick={()=> setShowModal(true)}>
+              Join &#43;
+              </button>
+            <button className="create-room"  onClick={()=> setShowModal1(true)}>
+              Create &#10162;
+              </button>
           </div>
+            {/* join Room Modal Popup */}
+       {showModal && (
+        <div className="modal-overlay-create">
+          
+          <div className="modal-content-create">
+          <div className="createlogo">
+      <img src="/joinroom.png" alt=""/>
+    </div>
+            <h2>Quick Code </h2>
+            <p> Code, Chat, Collaborate. It's All in Sync</p>
+            <input
+              type="text"
+              className="input-field"
+              placeholder="ROOM ID"
+              onChange={(e) => setRoomId(e.target.value)}
+              value={roomId}
+              onKeyUp={handleInputEnter}
+          />
+          <input
+              type="text"
+              className="input-field"
+              placeholder="USERNAME"
+              onChange={(e) => setUsername(e.target.value)}
+              value={username}
+              onKeyUp={handleInputEnter}
+          />
+          <button className="createRoom-btn" onClick={createroom}>
+              Join
+          </button>
+          <button className="close-btn" onClick={() => setShowModal(false)}>
+            close
+          </button>
+       </div>
+       </div>
+)}
+          
+       {/* create Room Modal Popup */}
+       {showModal1 && (
+        <div className="modal-overlay-create">
+          
+          <div className="modal-content-create">
+          <div className="createlogo">
+      <img src="/createroom.png" alt=""/>
+    </div>
+            <h2>Quick Code </h2>
+            <p> Code, Chat, Collaborate. It's All in Sync</p>
+            <input
+              type="text"
+              className="input-field"
+              placeholder="ROOM ID"
+              onChange={(e) => setRoomId(e.target.value)}
+              value={roomId}
+              onKeyUp={handleInputEnter}
+          />
+          <input
+              type="text"
+              className="input-field"
+              placeholder="USERNAME"
+              onChange={(e) => setUsername(e.target.value)}
+              value={username}
+              onKeyUp={handleInputEnter}
+          />
+          <button className="createRoom-btn" onClick={createroom}>
+              Join
+          </button>
+          <button className="close-btn" onClick={() => setShowModal1(false)}>
+            close
+          </button>
+          <div className="createInfo">
+          <span className="createInfo">
+              If you don't have an invite then create &nbsp;
+              <a
+                  onClick={createNewRoom}
+                  href="./"
+                  className="createNewBtn"
+              >
+                  new room
+              </a>
+          </span>
+          </div>
+          </div>
+        </div>
+      )}
 
           <h3>NO NEED TO LOGIN AND SIGNUP</h3>
         </div>
@@ -139,7 +261,7 @@ const HeroSection = () => {
            whileInView="show"
            viewport={{ once: false, amount: 0.2 }}
           className="join">
-        <img src="/login.jpg" alt="Real-time editor visual" />
+        <img src="/login.png" alt="Real-time editor visual" />
         </motion.div>
         <motion.div 
          variants={fadeIn("right", 0.2)}
@@ -185,8 +307,7 @@ const HeroSection = () => {
            whileInView="show"
            viewport={{ once: false, amount: 0.7 }}
            className="main">
-        <div 
-         className="card">
+        <div  className="card">
         <img src="f1.png" alt="" />
           <p>Real-Time Collaborative Code Edit At a Same Time.</p>
         </div>
@@ -194,16 +315,16 @@ const HeroSection = () => {
         <img src="f2.png" alt=""  />
           <p>This Tool Is Specially Made For Students And Developers .</p>
         </div>
-        <div 
-         className="card">
-        <img src="f3.jpg" alt=""  />
+        <div  className="card">
+        <img src="f3.png" alt=""  />
           <p>Join Via Room Id No Need Of Login And Signup.</p>
         </div>
         <div className="card">
         <img src="f4.png" alt=""  />
           <p>Real-Time Voice Communication And Code Compilation .</p>
         </div>
-       <div className="card">
+       <div
+        className="card">
        <img src="f5.png" alt=""  />
           <p>Unlimited Candidated Can Join One Room At A Time.</p>
         </div>

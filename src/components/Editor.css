@@ -1,0 +1,106 @@
+.mainWrap {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+}
+
+.aside {
+  background: #1c1e29;
+  padding: 16px;
+  color: #fff;
+  display: flex;
+  width: 170px;
+  flex-direction: column;
+  height: 95vh;
+}
+.asideInner {
+  flex: 1;
+  width: 170px;
+}
+.asideInner hr{
+  margin-top: 20px;
+}
+
+  /* Logo styling */
+  .logo {
+    text-align: center;
+    margin-bottom: 20px;
+    margin-top: 10px;
+  }
+  .tag {
+    margin-top: -40px;
+    font-size:8px;
+    margin-left: 55px;
+  }
+  
+  .logoImage {
+    margin-top: -5px;
+    width: auto;
+    height: 48px;
+  }
+  .asideInner h1{
+    margin-top: -2px;
+    font-size:18px;
+  }
+ .asideInner h3{
+    display: flex;
+    margin-top: 8px;
+    margin-bottom: 20px;
+  }
+  
+  /* Connected clients section */
+  .clientsList {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .client 
+  {
+    display:inline-flex;
+    align-items: center;
+    flex-direction: column;
+    font-weight: bold;
+  }
+  
+  /* Button styling */
+  .btn {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    margin-top: 5px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007acc;
+    color: #ffffff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  
+  .copyBtn {
+    background-color: #7d5fff;
+    
+  }
+  
+  .copyBtn:hover {
+    
+    background-color: white;
+    color: black;
+  }
+  
+  .leaveBtn {
+    background-color: #f44336;
+  }
+  
+  .leaveBtn:hover {
+    background-color: #d32f2f;
+  }
+  .editorWrap {
+   text-align: left;
+    height: 100vh;
+
+  }
+ 
+  

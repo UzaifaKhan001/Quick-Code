@@ -6,35 +6,44 @@ import './App.css';
 import FAQ from './components/FAQ';
 import Cards from './components/Cards';
 import Footer from './components/Footer';
+import Editor from './components/Editor';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   return (
     <>
-    <Router>
-      <div className="App">
-        <Header />
-        
-        <Routes>
-          <Route
-            path="/"
-            element={<div id="hero"><HeroSection /></div>}
-          />
-          <Route
-            path="features"
-            element={<div id="features"><HeroSection /></div>}
-          />
-        </Routes>
+      <div>
+        <Toaster
+          position="top-center"
+          toastOptions={{
+            success: {
+              theme: {
+                primary: '#4aed88',
+              },
+            },
+          }}
+        />
       </div>
-    </Router>
-    <div>
-      <FAQ/>
-    </div>
-    <div>
-      <Cards/>
-    </div>
-    <div>
-      <Footer/>
-    </div>
+      <Router>
+        <div className="App">
+         
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <>
+                 <Header />
+                  <HeroSection />
+                  <FAQ />
+                  <Cards />
+                  <Footer />
+                </>
+              }
+            />
+            <Route path="/editor/:roomId" element={<Editor />} />
+          </Routes>
+        </div>
+      </Router>
     </>
   );
 }

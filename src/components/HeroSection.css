@@ -67,9 +67,8 @@ h3{
   display: flex;
   gap: 19px;
   padding-left: 80px;
-  padding-top: 6px;
+  padding-top: 5px;
 }
-
 .hero-buttons .btn.primary,
 .hero-buttons .btn.secondary {
   background-color: #6c5ce7;
@@ -95,7 +94,7 @@ h3{
   box-shadow: 0 0 10px rgba(0, 0, 0, .3);
   filter: blur(20px); 
   position: absolute;
-  margin-right: -700px;
+  margin-right: -790px;
   margin-top: 60px;
 }
 @keyframes upDown {
@@ -124,6 +123,31 @@ h3{
   75% { content: "FRIENDS ⚡"; }
   100% { content: "MEMBERS ⚡"; }
 }
+button {
+  padding: 15px 30px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+}
+
+button.join-room {
+  background-color: #7d5fff;
+  color: white;
+  border: 2px solid #7d5fff;
+  box-shadow: white 0px 0px 8px 4px;
+  font-size: 17px;
+  margin-left: 21px;
+}
+
+button.create-room {
+  background-color: #7d5fff;
+  color: white;
+  border: 2px solid #7d5fff;
+  box-shadow: white 0px 0px 8px 4px;
+  margin-left: 20px;
+}
+
 
 /* Hover Effects for Buttons */
 .join-room:hover {
@@ -135,19 +159,21 @@ h3{
 }
 
 .create-room:hover {
-  color: white;
-  background-color: #7d5fff;
-  box-shadow: white 0px 0px 8px 4px;
+  color: black;
+  background-color: white;
+  box-shadow: #7d5fff 0px 0px 8px 4px;
   transition: all 0.3s ease;
-  cursor: grabbing ;
+  cursor: grabbing;
+  
 }
+
 /* Section Styling */
 .about {
   background-color: #1A1A1A;
   display: flex;
   justify-content: center; /* Center content horizontally */
   align-items: center; /* Center content vertically */
-  height: auto; /* Allow height to adjust for smaller screens */
+  height: auto; 
   padding: 20px; /* Add padding for spacing on small screens */
   
 }
@@ -168,6 +194,7 @@ h3{
 }
 
 .slider {
+  height: 140px;
   margin-top: 0; /* Adjust margin for smaller screens */
   background-color: transparent;
   padding: 4em 1em; /* Adjust padding for smaller screens */
@@ -180,6 +207,9 @@ h3{
   100% {
     transform: translateX(-1000%);
   }
+}
+.hero2{
+  margin-top: 5%;
 }
 
 .hero2 h1{
@@ -295,11 +325,11 @@ h3{
   border-radius: 10px;
 }
 .features {
-  /* padding: 40px 20px; */
+  padding: 100px 5px;
   text-align: center;
   background-color:#1A1A1A;
   height: 450px;
-  margin-top: 150px;
+  margin-top: 90px;
 }
 
 /* Main Container */
@@ -351,9 +381,180 @@ h3{
 .card:hover p {
   color: #fff; /* Text color changes to white on hover */
 }
+/* Overlay for Modal (Blur Effect) */
+/* .modal-overlay-join {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4); /* Slight dark overlay 
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+} */
+.modal-overlay-create {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4); /* Slight dark overlay */
+  backdrop-filter: blur(8px); /* Blur effect */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+/* Modal Box */
+/* .joinlogo img
+{
+  display: flex;
+  padding: 0%;
+  height: 300px;
+  width: auto;
+  margin-top: 30px;
+  margin-left: 10px;
+  margin-bottom: 10px;
+  filter: drop-shadow(2px 2px 5px black);
+  
+} */
+.createlogo img
+{
+  display: flex;
+  padding: 0%;
+  height: 300px;
+  width: auto;
+  margin-top: 27px;
+  margin-left: -10px;
+  margin-bottom: 14px;
+  filter: drop-shadow(2px 2px 5px black);
+  
+}
+/* .modal-content-join {
+  background: rgb(43, 36, 36);
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  width: 600px;
+  height: 400px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+} */
+.modal-content-create {
+  background: rgb(43, 36, 36);
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  width: 600px;
+  height: 400px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+/* Input Fields */
+.input-field {
+  width: 40%;
+  padding: 10px;
+  margin: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  justify-content: right;
+ margin-left: 157px;
+}
+/* .modal-content-join h2{
+  margin-top: -45%;
+  text-align: center;
+  margin-left: 24%;
+} */
+.modal-content-create h2{
+  margin-top: -45%;
+  text-align: center;
+  margin-left: 24%;
+}
+/* .modal-content-join p{
+ text-align: center;
+ margin-left: 38%;
+} */
+.modal-content-create p{
+  text-align: center;
+  margin-left: 38%;
+ }
 
+/* Buttons */
 
+/* .JoinRoom-btn {
+  border: 1px solid white;
+margin-top: 30px ;
+margin-left: 280px;
+  padding: 8px 12px ;
+  width: 75px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: white;
+  display: flex;
+  background-color: #7d5fff;
+  transition: all 0.3s ease;
+} */
+.createRoom-btn {
+  border: 1px solid white;
+margin-top: 30px ;
+margin-left: 284px;
+  padding: 8px 20px ;
+  width: 75px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: white;
+  display: flex;
+  background-color: #7d5fff;
+  transition: all 0.3s ease;
+}
+.createRoom-btn:hover{
+  color: black;
+  background-color:white;
+  box-shadow: #7d5fff 0px 0px 8px 4px;
+  cursor: grabbing;
+}
 
+/* .JoinRoom-btn:hover
+{
+  color: black;
+  background-color: white;
+  box-shadow: #7d5fff 0px 0px 8px 4px;
+  cursor: grabbing;
+} */
+.close-btn {
+  border: 1px solid white;
+margin-top: -37px;
+margin-left: 380px;
+  padding: 8px 17px;
+  border-radius: 12px;
+  text-decoration: none;
+  width: 75px;
+  color: black;
+  display: flex;
+  background-color: white;
+  transition: all 0.3s ease;
+}
+.close-btn:hover
+{
+  color: white;
+  background-color:#7d5fff ;
+  box-shadow: white 0px 0px 8px 4px;
+  cursor: grabbing;
+}
+.createInfo
+{
+  margin-top: 2%;
+  margin-left: 12%;
+  font-size: small;
+}
+.createInfo a{
+  color: gray;
+ 
+}
+.createInfo a:hover{
+  color: #7d5fff;
+}
 /* Responsive Design */
 @media (max-width: 768px) {
   .card {

@@ -29,7 +29,7 @@ nav {
 
       nav ul li {
           list-style: none;
-          padding: 0px 50px;
+          padding: 0px 60px;
           align-content: center;
           
       }
@@ -67,17 +67,49 @@ nav ul li a:after {
   bottom: 0;
 }
 nav ul li a:hover:after {
-  width: 100%;
+  width: 80%;
 }
-
-    
+.home .lucide{
+  display: flex;
+  height: 18px;
+  margin-right: 55px;
+  margin-bottom: -17px;
+}
+ .lists .lucide
+{
+  display: flex;
+  height: 18px;
+  margin-right: 75px;
+  margin-bottom: -17px;
+ }  
+ .about1 .lucide{
+  display: flex;
+  height: 18px;
+  margin-right: 55px;
+  margin-bottom: -17px;
+ } 
+ .faqs1 .lucide
+ {
+  display: flex;
+  height: 18px;
+  margin-right: 55px;
+  margin-bottom: -17px;
+ }
 /* Auth Buttons Styling */
 .auth-buttons {
   display: flex;
   gap: 35px;
   margin-right: 70px;
-  
 
+}
+.lucide
+{
+  padding-right: 10px;
+  
+}
+ .signup-btn .lucide
+{
+  margin-left: 5px;
 }
 .login-btn, .signup-btn {
   border: 1px solid white;
@@ -107,6 +139,174 @@ nav ul li a:hover:after {
   color: white;
   background-color: #7d5fff;
   box-shadow: white 0px 0px 8px 4px;
+  cursor: grabbing;
+   
+}
+/* Overlay for Modal (Blur Effect) */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4); /* Slight dark overlay */
+  backdrop-filter: blur(8px); /* Blur effect */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Modal Box */
+.loginlogo img
+{
+  display: flex;
+  padding: 0%;
+  height: 300px;
+  width: auto;
+  margin-top: 60px;
+  margin-right: 700px;
+  filter: drop-shadow(2px 2px 5px black);
+  transform: rotateY(180deg);
+}
+.signuplogo img
+{
+  display: flex;
+  padding: 0%;
+  height: 300px;
+  width: auto;
+  margin-top: 60px;
+  filter: drop-shadow(2px 2px 5px black);
+  transform: rotateY(180deg);
+}
+.modal-content {
+  background: rgb(43, 36, 36);
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  width: 900px;
+  height: 400px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+.modal-content2 {
+  background: rgb(43, 36, 36);
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  width: 900px;
+  height: 400px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+.modal-content h2{
+  margin-top: -30%;
+  text-align: center;
+  margin-left: 35%;
+}
+.modal-content2 h2{
+  margin-top: -35%;
+  text-align: center;
+  margin-left: 35%;
+}
+
+/* Input Fields */
+.modal-content .input-field {
+  width: 40%;
+  padding: 10px;
+  margin: 5px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  justify-content: right;
+ margin-left: 330px;
+}
+.modal-content2 .input-field {
+  width: 40%;
+  padding: 10px;
+  margin: 5px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  justify-content: right;
+ margin-left: 330px;
+}
+
+/* Buttons */
+
+.login-btn1 {
+  border: 1px solid white;
+margin-top: 30px ;
+margin-left: 510px;
+  padding: 8px 15px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: white;
+  display: flex;
+  background-color: #7d5fff;
+  transition: all 0.3s ease;
+}
+.login-btn1:hover
+{
+  color: black;
+  background-color: white;
+  box-shadow: #7d5fff 0px 0px 8px 4px;
+  cursor: grabbing;
+}
+.signup-btn1 {
+  border: 1px solid white;
+margin-top: 30px ;
+margin-left: 530px;
+  padding: 8px 15px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: black;
+  display: flex;
+  background-color: white;
+  transition: all 0.3s ease;
+}
+.signup-btn1:hover
+{
+  color: white;
+  background-color: #7d5fff;
+  box-shadow: white 0px 0px 8px 4px;
+  cursor: grabbing;
+}
+/* Close Button */
+.close-btn1 {
+  border: 1px solid white;
+margin-top: -37px;
+margin-left: 70%;
+  padding: 8px 15px;
+  border-radius: 12px;
+  text-decoration: none;
+  width: 75px;
+  color: black;
+  display: flex;
+  background-color: white;
+  transition: all 0.3s ease;
+}
+.close-btn2 {
+  border: 1px solid white;
+margin-top: -37px;
+margin-left: 650px;
+  padding: 8px 15px;
+  border-radius: 12px;
+  text-decoration: none;
+  width: 75px;
+  color: white;
+  display: flex;
+  background-color: #7d5fff;
+  transition: all 0.3s ease;
+}
+.close-btn1:hover
+{
+  color: white;
+  background-color:#7d5fff ;
+  box-shadow: white 0px 0px 8px 4px;
+  cursor: grabbing;
+}
+.close-btn2:hover
+{
+  color: black;
+  background-color:white ;
+  box-shadow: #7d5fff 0px 0px 8px 4px;
   cursor: grabbing;
 }
 

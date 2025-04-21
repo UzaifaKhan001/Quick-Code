@@ -55,7 +55,7 @@ const Footer = () => {
           <div>
             <span className="footer-logo-icon"><img src="logo.png" alt="" /></span> <span className="p">QuickCode</span>
           </div>
-          <p>© 2024 Codefile. All rights reserved.</p>
+          <p>© 2024 QuickCode. All rights reserved.</p>
         </div>
       </div>
     </footer>
