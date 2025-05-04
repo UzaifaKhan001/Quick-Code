@@ -1,43 +1,58 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef} from 'react';
 import Codemirror from 'codemirror';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/dracula.css';
 import 'codemirror/mode/javascript/javascript';
 import 'codemirror/addon/edit/closetag';
 import 'codemirror/addon/edit/closebrackets';
+import ACTIONS from '../Actions';
 
-const CodeEditor = () => {
-  const editorRef = useRef(null); // Ref to store the CodeMirror instance
 
-  useEffect(() => {
-    // Initialize CodeMirror
-    const editor = Codemirror.fromTextArea(
-      document.getElementById('realtimeEditor'),
-      {
-        mode: { name: 'javascript', json: true },
-        theme: 'dracula',
-        autoCloseTags: true,
-        autoCloseBrackets: true,
-        lineNumbers: true,
-      }
-    );
+const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
+    const editorRef = useRef(null);
+    useEffect(() => {
+        async function init() {
+            editorRef.current = Codemirror.fromTextArea(
+                document.getElementById('realtimeEditor'),
+                {
+                    mode: { name: 'javascript', json: true },
+                    theme: 'dracula',
+                    autoCloseTags: true,
+                    autoCloseBrackets: true,
+                    lineNumbers: true,
+                }
+            );
 
-    // Store the CodeMirror instance in the ref
-    editorRef.current = editor;
+            editorRef.current.on('change', (instance, changes) => {
+                const { origin } = changes;
+                const code = instance.getValue();
+                onCodeChange(code);
+                if (origin !== 'setValue') {
+                    socketRef.current.emit(ACTIONS.CODE_CHANGE, {
+                        roomId,
+                        code,
+                    });
+                }
+            });
+        }
+        init();
+    }, [socketRef, roomId, onCodeChange]);
 
-    // Set the height of the editor
-    editor.setSize(null, '100%');
+    useEffect(() => {
+        if (socketRef.current) {
+            socketRef.current.on(ACTIONS.CODE_CHANGE, ({ code }) => {
+                if (code !== null) {
+                    editorRef.current.setValue(code);
+                }
+            });
+        }
 
-    // Cleanup function to destroy the CodeMirror instance
-    return () => {
-      if (editorRef.current) {
-        editorRef.current.toTextArea(); // Revert the textarea back to its original state
-        editorRef.current = null;
-      }
-    };
-  }, []); // Empty dependency array ensures this runs only once
+        return () => {
+            socketRef.current.off(ACTIONS.CODE_CHANGE);
+        };
+    }, [socketRef.current]);
 
-  return <textarea id="realtimeEditor" />;
+    return <textarea id="realtimeEditor"></textarea>;
 };
 
 export default CodeEditor;
