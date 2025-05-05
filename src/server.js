@@ -37,15 +37,29 @@ io.on('connection', (socket) => {
     console.log('socket connected', socket.id);
 
     socket.on(ACTIONS.JOIN, ({ roomId, username }) => {
+        // Remove any existing connection for this username
+        Object.entries(userSocketMap).forEach(([socketId, name]) => {
+            if (name === username) {
+                delete userSocketMap[socketId];
+                const existingSocket = io.sockets.sockets.get(socketId);
+                if (existingSocket) {
+                    existingSocket.disconnect();
+                }
+            }
+        });
+
+        // Add new user
         userSocketMap[socket.id] = username;
         socket.join(roomId);
+        
+        // Get updated client list
         const clients = getAllConnectedClients(roomId);
-        clients.forEach(({ socketId }) => {
-            io.to(socketId).emit(ACTIONS.JOINED, {
-                clients,
-                username,
-                socketId: socket.id,
-            });
+        
+        // Broadcast to all clients in the room
+        io.to(roomId).emit(ACTIONS.JOINED, {
+            clients,
+            username,
+            socketId: socket.id,
         });
     });
 

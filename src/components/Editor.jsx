@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import './Editor.css';
 import ACTIONS from '../Actions';
 import Client from '../components/Client';
 import CodeEditor from '../components/CodeEditor';
@@ -44,11 +45,18 @@ const Editor = () => {
                         toast.success(`${username} joined the room.`);
                         console.log(`${username} joined`);
                     }
-                    setClients(clients);
-                    socketRef.current.emit(ACTIONS.SYNC_CODE, {
-                        code: codeRef.current,
-                        socketId,
-                    });
+                    // Update clients list with unique users
+                    const uniqueClients = clients.filter((client, index, self) =>
+                        index === self.findIndex((c) => c.username === client.username)
+                    );
+                    setClients(uniqueClients);
+                    
+                    if (socketId !== socketRef.current.id) {
+                        socketRef.current.emit(ACTIONS.SYNC_CODE, {
+                            code: codeRef.current,
+                            socketId,
+                        });
+                    }
                 }
             );
 
@@ -67,9 +75,11 @@ const Editor = () => {
         };
         init();
         return () => {
-            socketRef.current.disconnect();
-            socketRef.current.off(ACTIONS.JOINED);
-            socketRef.current.off(ACTIONS.DISCONNECTED);
+            if (socketRef.current) {
+                socketRef.current.disconnect();
+                socketRef.current.off(ACTIONS.JOINED);
+                socketRef.current.off(ACTIONS.DISCONNECTED);
+            }
         };
     }, [location.state?.username, roomId, reactNavigator]);
 
