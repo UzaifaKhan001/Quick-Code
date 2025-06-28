@@ -7,65 +7,274 @@
   } */
 
 .editor-container {
-    height: 100%;
-    width: 100%;
-    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: #1e1e1e;
+    color: #ffffff;
+}
+
+.editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #2d2d2d;
+    border-bottom: 1px solid #404040;
+    min-height: 60px;
+}
+
+.language-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.language-selector label {
+    font-weight: 500;
+    color: #e0e0e0;
+}
+
+.language-selector select {
+    padding: 8px 12px;
+    border: 1px solid #404040;
+    border-radius: 4px;
+    background-color: #3d3d3d;
+    color: #ffffff;
+    font-size: 14px;
+    min-width: 200px;
+}
+
+.language-selector select:focus {
+    outline: none;
+    border-color: #007acc;
+}
+
+.run-button {
+    padding: 10px 20px;
+    background-color: #007acc;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.run-button:hover:not(:disabled) {
+    background-color: #005a9e;
+}
+
+.run-button:disabled {
+    background-color: #666666;
+    cursor: not-allowed;
+}
+
+.editor-main {
+    display: flex;
+    flex: 1;
     overflow: hidden;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-#realtimeEditor {
-    display: none;
+.code-section {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #404040;
 }
 
+.section-header {
+    padding: 10px 15px;
+    background-color: #2d2d2d;
+    border-bottom: 1px solid #404040;
+    font-weight: 500;
+    color: #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.execution-time {
+    font-size: 12px;
+    color: #888888;
+    font-weight: normal;
+}
+
+.io-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 300px;
+}
+
+.input-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid #404040;
+}
+
+.output-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.input-textarea {
+    flex: 1;
+    padding: 15px;
+    background-color: #1e1e1e;
+    border: none;
+    color: #ffffff;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 14px;
+    resize: none;
+    outline: none;
+}
+
+.input-textarea::placeholder {
+    color: #666666;
+}
+
+.output-display {
+    flex: 1;
+    padding: 15px;
+    background-color: #1e1e1e;
+    overflow-y: auto;
+}
+
+.output-display pre {
+    margin: 0;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.status-message {
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 13px;
+}
+
+.status-3 {
+    background-color: #1e4d2b;
+    color: #4ade80;
+    border: 1px solid #22c55e;
+}
+
+.status-6 {
+    background-color: #4c1d1d;
+    color: #f87171;
+    border: 1px solid #ef4444;
+}
+
+.status-7 {
+    background-color: #4c1d1d;
+    color: #f87171;
+    border: 1px solid #ef4444;
+}
+
+.status-5 {
+    background-color: #422006;
+    color: #fbbf24;
+    border: 1px solid #f59e0b;
+}
+
+.status-8 {
+    background-color: #422006;
+    color: #fbbf24;
+    border: 1px solid #f59e0b;
+}
+
+.status-4 {
+    background-color: #4c1d1d;
+    color: #f87171;
+    border: 1px solid #ef4444;
+}
+
+.status-11 {
+    background-color: #4c1d1d;
+    color: #f87171;
+    border: 1px solid #ef4444;
+}
+
+/* CodeMirror customizations */
 .CodeMirror {
     height: 100% !important;
-    font-size: 16px;
-    font-family: 'Fira Code', 'Consolas', monospace;
-    line-height: 1.6;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.5;
 }
 
-/* Custom scrollbar styling */
-.CodeMirror-scrollbar-filler {
-    background-color: transparent;
-}
-
-.CodeMirror-simplescroll-horizontal,
-.CodeMirror-simplescroll-vertical {
-    background-color: #2d2d2d;
-}
-
-.CodeMirror-simplescroll-horizontal div,
-.CodeMirror-simplescroll-vertical div {
-    background-color: #4a4a4a;
-    border: 1px solid #666;
-    border-radius: 10px;
-}
-
-/* Line number styling */
 .CodeMirror-gutters {
-    border-right: 1px solid #3d3d3d;
-    background-color: #282a36;
-    padding-right: 8px;
+    background-color: #2d2d2d;
+    border-right: 1px solid #404040;
 }
 
 .CodeMirror-linenumber {
-    color: #6272a4;
-    padding: 0 8px;
+    color: #888888;
 }
 
-/* Active line highlighting */
-.CodeMirror-activeline-background {
-    background-color: #44475a !important;
+/* Responsive design */
+@media (max-width: 768px) {
+    .editor-main {
+        flex-direction: column;
+    }
+    
+    .code-section {
+        border-right: none;
+        border-bottom: 1px solid #404040;
+        flex: 1;
+    }
+    
+    .io-section {
+        flex: 1;
+        min-width: auto;
+    }
+    
+    .editor-header {
+        flex-direction: column;
+        gap: 10px;
+        padding: 15px;
+    }
+    
+    .language-selector {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .language-selector select {
+        min-width: 150px;
+    }
+    
+    .run-button {
+        width: 100%;
+    }
 }
 
-/* Selection styling */
-.CodeMirror-selected {
-    background-color: #44475a !important;
+/* Scrollbar styling */
+.output-display::-webkit-scrollbar,
+.input-textarea::-webkit-scrollbar {
+    width: 8px;
 }
 
-/* Cursor styling */
-.CodeMirror-cursor {
-    border-left: 2px solid #f8f8f2 !important;
+.output-display::-webkit-scrollbar-track,
+.input-textarea::-webkit-scrollbar-track {
+    background: #2d2d2d;
+}
+
+.output-display::-webkit-scrollbar-thumb,
+.input-textarea::-webkit-scrollbar-thumb {
+    background: #555555;
+    border-radius: 4px;
+}
+
+.output-display::-webkit-scrollbar-thumb:hover,
+.input-textarea::-webkit-scrollbar-thumb:hover {
+    background: #777777;
 }

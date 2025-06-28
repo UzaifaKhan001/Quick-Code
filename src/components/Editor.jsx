@@ -72,6 +72,21 @@ const Editor = () => {
                     });
                 }
             );
+
+            // Listening for input changes
+            socketRef.current.on(ACTIONS.INPUT_CHANGE, ({ input }) => {
+                // Input changes are handled in CodeEditor component
+            });
+
+            // Listening for language changes
+            socketRef.current.on(ACTIONS.LANGUAGE_CHANGE, ({ language }) => {
+                // Language changes are handled in CodeEditor component
+            });
+
+            // Listening for code execution output
+            socketRef.current.on(ACTIONS.CODE_OUTPUT, ({ output, executionTime }) => {
+                // Code output is handled in CodeEditor component
+            });
         };
         init();
         return () => {
@@ -79,6 +94,9 @@ const Editor = () => {
                 socketRef.current.disconnect();
                 socketRef.current.off(ACTIONS.JOINED);
                 socketRef.current.off(ACTIONS.DISCONNECTED);
+                socketRef.current.off(ACTIONS.INPUT_CHANGE);
+                socketRef.current.off(ACTIONS.LANGUAGE_CHANGE);
+                socketRef.current.off(ACTIONS.CODE_OUTPUT);
             }
         };
     }, [location.state?.username, roomId, reactNavigator]);
