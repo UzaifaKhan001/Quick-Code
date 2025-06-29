@@ -1,0 +1,227 @@
+.voice-chat-container {
+    background: #1a1a1a;
+    border-radius: 6px;
+    padding: 8px;
+    margin: 8px 0;
+    border: 1px solid #333;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    max-width: 250px;
+}
+
+.voice-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #333;
+}
+
+.voice-header h3 {
+    margin: 0;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.connection-status {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 9px;
+}
+
+.status-text {
+    font-weight: 500;
+}
+
+.status-text.connected {
+    color: #10b981;
+}
+
+.status-text.connecting {
+    color: #f59e0b;
+}
+
+.status-text.disconnected {
+    color: #6b7280;
+}
+
+.status-text.error {
+    color: #ef4444;
+}
+
+.voice-controls {
+    margin-bottom: 8px;
+}
+
+.voice-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #374151;
+    color: #fff;
+    min-width: 70px;
+}
+
+.voice-button:hover:not(:disabled) {
+    background: #4b5563;
+}
+
+.voice-button:active {
+    transform: translateY(0);
+}
+
+.voice-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.voice-button.join-call {
+    background: #10b981;
+    color: white;
+    width: 100%;
+    justify-content: center;
+}
+
+.voice-button.join-call:hover:not(:disabled) {
+    background: #059669;
+}
+
+.call-controls {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.voice-button.muted {
+    background: #ef4444;
+    color: white;
+}
+
+.voice-button.muted:hover {
+    background: #dc2626;
+}
+
+.voice-button.deafened {
+    background: #f59e0b;
+    color: white;
+}
+
+.voice-button.deafened:hover {
+    background: #d97706;
+}
+
+.voice-button.leave-call {
+    background: #ef4444;
+    color: white;
+}
+
+.voice-button.leave-call:hover {
+    background: #dc2626;
+}
+
+.voice-participants {
+    border-top: 1px solid #333;
+    padding-top: 6px;
+}
+
+.participants-header {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 6px;
+    color: #9ca3af;
+    font-size: 10px;
+    font-weight: 500;
+}
+
+.participant {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 6px;
+    margin-bottom: 4px;
+    background: #2d2d2d;
+    border-radius: 3px;
+    border: 1px solid #404040;
+}
+
+.participant.local-participant {
+    background: #1f2937;
+    border-color: #10b981;
+}
+
+.participant-info {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+}
+
+.participant-name {
+    color: #fff;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.mute-indicator,
+.deafen-indicator {
+    font-size: 9px;
+    padding: 1px 3px;
+    border-radius: 2px;
+    background: #374151;
+    color: #fff;
+}
+
+.connecting-indicator {
+    color: #f59e0b;
+    font-size: 9px;
+    font-style: italic;
+}
+
+.remote-audio {
+    display: none;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .voice-chat-container {
+        margin: 6px 0;
+        padding: 8px;
+        max-width: 100%;
+    }
+    
+    .call-controls {
+        flex-direction: row;
+        gap: 4px;
+    }
+    
+    .voice-button {
+        min-width: 60px;
+        padding: 5px 8px;
+        font-size: 10px;
+    }
+}
+
+/* Smooth transitions */
+.voice-chat-container,
+.voice-button,
+.participant {
+    transition: all 0.2s ease;
+}
+
+/* Focus states for accessibility */
+.voice-button:focus {
+    outline: 1px solid #3b82f6;
+    outline-offset: 1px;
+}

@@ -19,6 +19,7 @@ import ACTIONS from '../Actions';
 import { JUDGE0_CONFIG, LANGUAGE_OPTIONS, JUDGE0_STATUS } from '../config/judge0';
 import './codeEditor.css';
 
+
 const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
     const editorRef = useRef(null);
     const [selectedLanguage, setSelectedLanguage] = useState(LANGUAGE_OPTIONS[0]);
@@ -27,6 +28,7 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
     const [isExecuting, setIsExecuting] = useState(false);
     const [executionTime, setExecutionTime] = useState(null);
     const [executionStatus, setExecutionStatus] = useState(null);
+    const username = localStorage.getItem('username') || 'User';
 
     useEffect(() => {
         let editor;
@@ -62,10 +64,6 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
                         });
                     }
                 });
-            } else {
-                // Only update mode/template if language changes
-                editorRef.current.setOption('mode', selectedLanguage.mode);
-                editorRef.current.setValue(selectedLanguage.template);
             }
         }
         init();
@@ -75,12 +73,25 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
                 editorRef.current = null;
             }
         };
-    }, [socketRef, roomId, onCodeChange, selectedLanguage]);
+    }, [onCodeChange, socketRef.current, roomId, selectedLanguage]);
+
+    useEffect(() => {
+        if (editorRef.current) {
+            editorRef.current.setOption('mode', selectedLanguage.mode);
+            const currentValue = editorRef.current.getValue();
+            const isDefaultTemplate = LANGUAGE_OPTIONS.some(lang => 
+                lang.template === currentValue
+            );
+            if (isDefaultTemplate || !currentValue.trim()) {
+                editorRef.current.setValue(selectedLanguage.template);
+            }
+        }
+    }, [selectedLanguage]);
 
     useEffect(() => {
         if (socketRef.current) {
             socketRef.current.on(ACTIONS.CODE_CHANGE, ({ code }) => {
-                if (code !== null) {
+                if (code !== null && editorRef.current) {
                     editorRef.current.setValue(code);
                 }
             });
@@ -93,7 +104,14 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
                 setSelectedLanguage(language);
                 if (editorRef.current) {
                     editorRef.current.setOption('mode', language.mode);
-                    editorRef.current.setValue(language.template);
+                    // Only set template if editor is empty or has default template
+                    const currentValue = editorRef.current.getValue();
+                    const isDefaultTemplate = LANGUAGE_OPTIONS.some(lang => 
+                        lang.template === currentValue
+                    );
+                    if (isDefaultTemplate || !currentValue.trim()) {
+                        editorRef.current.setValue(language.template);
+                    }
                 }
             });
 
@@ -115,13 +133,20 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
                 socketRef.current.off(ACTIONS.CODE_OUTPUT);
             }
         };
-    }, [socketRef.current]);
+    }, [socketRef.current, roomId]); // Include dependencies to ensure proper re-initialization
 
     const handleLanguageChange = (language) => {
         setSelectedLanguage(language);
         if (editorRef.current) {
             editorRef.current.setOption('mode', language.mode);
-            editorRef.current.setValue(language.template);
+            // Only set template if editor is empty or has default template
+            const currentValue = editorRef.current.getValue();
+            const isDefaultTemplate = LANGUAGE_OPTIONS.some(lang => 
+                lang.template === currentValue
+            );
+            if (isDefaultTemplate || !currentValue.trim()) {
+                editorRef.current.setValue(language.template);
+            }
         }
         socketRef.current.emit(ACTIONS.LANGUAGE_CHANGE, {
             roomId,
@@ -282,13 +307,15 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
                         ))}
                     </select>
                 </div>
-                <button 
-                    className="run-button"
-                    onClick={executeCode}
-                    disabled={isExecuting}
-                >
-                    {isExecuting ? 'Running...' : 'Run Code'}
-                </button>
+                <div className="button-group">
+                    <button 
+                        className="run-button"
+                        onClick={executeCode}
+                        disabled={isExecuting}
+                    >
+                        {isExecuting ? 'Running...' : 'Run Code'}
+                    </button>
+                </div>
             </div>
             
             <div className="editor-main">

@@ -4,6 +4,7 @@ import './Editor.css';
 import ACTIONS from '../Actions';
 import Client from '../components/Client';
 import CodeEditor from '../components/CodeEditor';
+import VoiceChat from '../components/VoiceChat';
 import { initSocket } from './socket';
 import {
     useLocation,
@@ -11,6 +12,7 @@ import {
     Navigate,
     useParams,
 } from 'react-router-dom';
+
 
 const Editor = () => {
     const socketRef = useRef(null);
@@ -64,11 +66,14 @@ const Editor = () => {
             socketRef.current.on(
                 ACTIONS.DISCONNECTED,
                 ({ socketId, username }) => {
+                    console.log('Editor: User disconnected:', username, 'socketId:', socketId);
                     toast.success(`${username} left the room.`);
                     setClients((prev) => {
-                        return prev.filter(
+                        const newClients = prev.filter(
                             (client) => client.socketId !== socketId
                         );
+                        console.log('Editor: Updated clients list:', newClients);
+                        return newClients;
                     });
                 }
             );
@@ -141,6 +146,11 @@ const Editor = () => {
             ))}
           </div>
         </div>
+        <VoiceChat 
+          socketRef={socketRef} 
+          roomId={roomId} 
+          username={location.state?.username} 
+        />
         <button className="btn copyBtn" onClick={copyRoomId}>
           Copy Room Id
         </button>
