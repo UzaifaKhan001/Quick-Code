@@ -9,7 +9,10 @@ const ACTIONS = require('./Actions');
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: "*",
+        origin: [
+            "http://localhost:3000",
+            "https://quickcodefy.netlify.app"
+        ],
         methods: ["GET", "POST"]
     }
 });

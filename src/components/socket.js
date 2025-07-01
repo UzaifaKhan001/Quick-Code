@@ -5,11 +5,18 @@ export const initSocket = async () => {
         'force new connection': true,
         reconnectionAttempts: Infinity,
         timeout: 10000,
-        transports: ['websocket', 'polling']
+        transports: ['polling']
     };
     const serverUrl = process.env.REACT_APP_BACKEND_URL || 'https://quick-code-ol6a.onrender.com';
     return io(serverUrl, options);
 };
 
-const socket = io("https://quick-code-ol6a.onrender.com"); // Use your deployed backend URL
+const options = {
+    'force new connection': true,
+    reconnectionAttempts: Infinity,
+    timeout: 10000,
+    transports: ['polling']
+};
+const serverUrl = process.env.REACT_APP_BACKEND_URL || 'https://quick-code-ol6a.onrender.com';
+const socket = io(serverUrl, options);
 export default socket;
