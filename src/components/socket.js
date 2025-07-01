@@ -5,18 +5,8 @@ export const initSocket = async () => {
         'force new connection': true,
         reconnectionAttempts: Infinity,
         timeout: 10000,
-        transports: ['polling']
+        transports: ['websocket', 'polling']
     };
-    const serverUrl = process.env.REACT_APP_BACKEND_URL || 'https://quick-code-ol6a.onrender.com';
+    const serverUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
     return io(serverUrl, options);
 };
-
-const options = {
-    'force new connection': true,
-    reconnectionAttempts: Infinity,
-    timeout: 10000,
-    transports: ['polling']
-};
-const serverUrl = process.env.REACT_APP_BACKEND_URL || 'https://quick-code-ol6a.onrender.com';
-const socket = io(serverUrl, options);
-export default socket;
