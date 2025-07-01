@@ -7,6 +7,9 @@ export const initSocket = async () => {
         timeout: 10000,
         transports: ['websocket', 'polling']
     };
-    const serverUrl = process.env.REACT_APP_BACKEND_URL || 'https://localhost:5000';
+    const serverUrl = process.env.REACT_APP_BACKEND_URL || 'https://quick-code-ol6a.onrender.com';
     return io(serverUrl, options);
 };
+
+const socket = io("https://quick-code-ol6a.onrender.com"); // Use your deployed backend URL
+export default socket;
