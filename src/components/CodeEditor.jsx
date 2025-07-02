@@ -127,7 +127,13 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
         editorRef.current = null;
       }
     };
-  }, [roomId, onCodeChange, socketRef, selectedLanguage.mode]);
+  }, [
+    roomId,
+    onCodeChange,
+    socketRef,
+    selectedLanguage.mode,
+    selectedLanguage.template,
+  ]); // Added selectedLanguage.template to dependencies
 
   const handleLanguageChange = useCallback(
     (language) => {
@@ -158,6 +164,34 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
     },
     [roomId, socketRef]
   );
+
+  const pollForResult = useCallback(async (token) => {
+    for (
+      let attempts = 0;
+      attempts < JUDGE0_CONFIG.MAX_POLLING_ATTEMPTS;
+      attempts++
+    ) {
+      try {
+        const response = await fetch(
+          `${JUDGE0_CONFIG.API_URL}/submissions/${token}`,
+          {
+            headers: {
+              "X-RapidAPI-Key": JUDGE0_CONFIG.RAPIDAPI_KEY,
+              "X-RapidAPI-Host": JUDGE0_CONFIG.RAPIDAPI_HOST,
+            },
+          }
+        );
+        const data = await response.json();
+        if (data.status?.id > 2) return data;
+        await new Promise((resolve) =>
+          setTimeout(resolve, JUDGE0_CONFIG.POLLING_INTERVAL)
+        );
+      } catch (error) {
+        console.error("Polling error:", error);
+      }
+    }
+    throw new Error("Execution timeout");
+  }, []);
 
   const executeCode = useCallback(async () => {
     if (!editorRef.current) return;
@@ -213,35 +247,7 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
       setExecutionStatus(JUDGE0_STATUS.INTERNAL_ERROR);
       setIsExecuting(false);
     }
-  }, [input, roomId, selectedLanguage.id, socketRef]);
-
-  const pollForResult = useCallback(async (token) => {
-    for (
-      let attempts = 0;
-      attempts < JUDGE0_CONFIG.MAX_POLLING_ATTEMPTS;
-      attempts++
-    ) {
-      try {
-        const response = await fetch(
-          `${JUDGE0_CONFIG.API_URL}/submissions/${token}`,
-          {
-            headers: {
-              "X-RapidAPI-Key": JUDGE0_CONFIG.RAPIDAPI_KEY,
-              "X-RapidAPI-Host": JUDGE0_CONFIG.RAPIDAPI_HOST,
-            },
-          }
-        );
-        const data = await response.json();
-        if (data.status?.id > 2) return data;
-        await new Promise((resolve) =>
-          setTimeout(resolve, JUDGE0_CONFIG.POLLING_INTERVAL)
-        );
-      } catch (error) {
-        console.error("Polling error:", error);
-      }
-    }
-    throw new Error("Execution timeout");
-  }, []);
+  }, [input, roomId, selectedLanguage.id, socketRef, pollForResult]); // Added pollForResult to dependencies
 
   const getStatusMessage = useCallback((statusId) => {
     const statusMessages = {
