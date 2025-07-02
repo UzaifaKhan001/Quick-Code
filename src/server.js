@@ -78,8 +78,8 @@ io.on('connection', (socket) => {
         socket.in(roomId).emit(ACTIONS.INPUT_CHANGE, { input });
     });
 
-    socket.on(ACTIONS.LANGUAGE_CHANGE, ({ roomId, language }) => {
-        socket.in(roomId).emit(ACTIONS.LANGUAGE_CHANGE, { language });
+    socket.on(ACTIONS.LANGUAGE_CHANGE, ({ roomId, languageId }) => {
+        socket.in(roomId).emit(ACTIONS.LANGUAGE_CHANGE, { languageId });
     });
 
     socket.on(ACTIONS.CODE_OUTPUT, ({ roomId, output, executionTime, status }) => {
