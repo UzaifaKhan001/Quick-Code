@@ -16,13 +16,15 @@ const io = new Server(server, {
 
 app.use(cors());
 
-// Serve static files from build directory
+// Serve static files from build directory (if it exists)
 app.use(express.static(path.join(__dirname, 'build')));
 
-// Handle all other routes by serving index.html
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'build', 'index.html'));
+// Basic API health check route
+app.get('/', (req, res) => {
+    res.json({ message: 'Socket.IO server is running', status: 'active' });
 });
+
+// Remove the catch-all route since there's no index.html to serve
 
 const userSocketMap = {};
 const voiceParticipants = new Map(); // Track voice participants per room
