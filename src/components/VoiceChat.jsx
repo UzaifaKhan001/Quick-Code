@@ -12,33 +12,44 @@ const VoiceChat = ({ socketRef, roomId, username }) => {
   const localStreamRef = useRef(null);
   const peerConnectionsRef = useRef(new Map());
   const audioElementsRef = useRef(new Map());
+  const pendingCandidatesRef = useRef(new Map()); // For queuing ICE candidates
 
-  // WebRTC configuration - moved outside to avoid recreation
+  // WebRTC configuration with TURN server (replace with your actual TURN server credentials)
   const rtcConfig = useRef({
     iceServers: [
       { urls: "stun:stun.l.google.com:19302" },
       { urls: "stun:stun1.l.google.com:19302" },
-      // Add more STUN servers for better connectivity
       { urls: "stun:stun2.l.google.com:19302" },
       { urls: "stun:stun3.l.google.com:19302" },
+      // Add your TURN server configuration here
+      {
+        urls: "turn:your-turn-server.com:3478",
+        username: "your-username",
+        credential: "your-credential",
+      },
     ],
+    iceTransportPolicy: "all", // Try "relay" if you only want to use TURN
   });
 
-  // Create peer connection
+  // Create peer connection with improved error handling
   const createPeerConnection = useCallback(
     (peerId) => {
       console.log(`Creating peer connection for ${peerId}`);
 
       const peerConnection = new RTCPeerConnection(rtcConfig.current);
+      pendingCandidatesRef.current.set(peerId, []);
 
-      // Add local stream tracks
+      // Add local stream tracks if available
       if (localStreamRef.current) {
         localStreamRef.current.getTracks().forEach((track) => {
-          console.log(
-            `Adding track to peer connection for ${peerId}:`,
-            track.kind
-          );
-          peerConnection.addTrack(track, localStreamRef.current);
+          try {
+            peerConnection.addTrack(track, localStreamRef.current);
+            console.log(
+              `Added ${track.kind} track to peer connection for ${peerId}`
+            );
+          } catch (error) {
+            console.error(`Error adding track to peer ${peerId}:`, error);
+          }
         });
       }
 
@@ -69,12 +80,12 @@ const VoiceChat = ({ socketRef, roomId, username }) => {
           const audioElement = document.createElement("audio");
           audioElement.className = "remote-audio";
           audioElement.autoplay = true;
-          audioElement.playsInline = true; // Important for mobile devices
+          audioElement.playsInline = true;
           audioElement.muted = isDeafened;
           audioElement.srcObject = remoteStream;
           audioElement.volume = 1.0;
 
-          // Add error handling for audio element
+          // Improved error handling for audio element
           audioElement.onerror = (e) => {
             console.error(`Audio element error for peer ${peerId}:`, e);
           };
@@ -91,15 +102,18 @@ const VoiceChat = ({ socketRef, roomId, username }) => {
         }
       };
 
-      // Handle ICE candidates
+      // Handle ICE candidates with buffering
       peerConnection.onicecandidate = (event) => {
         if (event.candidate) {
           console.log(`Sending ICE candidate to ${peerId}:`, event.candidate);
-          socketRef.current?.emit("voice-ice-candidate", {
-            roomId,
-            candidate: event.candidate,
-            to: peerId,
-          });
+          // Add slight delay to ensure offer/answer exchange completes
+          setTimeout(() => {
+            socketRef.current?.emit("voice-ice-candidate", {
+              roomId,
+              candidate: event.candidate,
+              to: peerId,
+            });
+          }, 100);
         } else {
           console.log(`ICE gathering completed for ${peerId}`);
         }
@@ -112,39 +126,30 @@ const VoiceChat = ({ socketRef, roomId, username }) => {
           peerConnection.connectionState
         );
 
-        if (peerConnection.connectionState === "connected") {
-          setConnectedPeers((prev) => {
-            const newPeers = new Map(prev);
-            const existingPeer = newPeers.get(peerId) || {};
-            newPeers.set(peerId, {
-              ...existingPeer,
-              connected: true,
+        switch (peerConnection.connectionState) {
+          case "connected":
+            setConnectedPeers((prev) => {
+              const newPeers = new Map(prev);
+              const existingPeer = newPeers.get(peerId) || {};
+              newPeers.set(peerId, {
+                ...existingPeer,
+                connected: true,
+              });
+              return newPeers;
             });
-            return newPeers;
-          });
-          setConnectionStatus("connected");
-        } else if (peerConnection.connectionState === "connecting") {
-          setConnectionStatus("connecting");
-        } else if (
-          peerConnection.connectionState === "disconnected" ||
-          peerConnection.connectionState === "failed"
-        ) {
-          console.log(`Peer ${peerId} disconnected or failed`);
-          setConnectedPeers((prev) => {
-            const newPeers = new Map(prev);
-            newPeers.delete(peerId);
-            return newPeers;
-          });
-
-          // Remove audio element
-          const audioElement = audioElementsRef.current.get(peerId);
-          if (audioElement) {
-            audioElement.remove();
-            audioElementsRef.current.delete(peerId);
-          }
-
-          // Clean up peer connection
-          peerConnectionsRef.current.delete(peerId);
+            setConnectionStatus("connected");
+            break;
+          case "connecting":
+            setConnectionStatus("connecting");
+            break;
+          case "disconnected":
+          case "failed":
+          case "closed":
+            console.log(`Peer ${peerId} disconnected or failed`);
+            cleanupPeerConnection(peerId);
+            break;
+          default:
+            break;
         }
       };
 
@@ -154,6 +159,13 @@ const VoiceChat = ({ socketRef, roomId, username }) => {
           `ICE connection state for ${peerId}:`,
           peerConnection.iceConnectionState
         );
+
+        if (peerConnection.iceConnectionState === "failed") {
+          console.error(
+            `ICE connection failed for ${peerId}, attempting restart...`
+          );
+          // Implement ICE restart logic here if needed
+        }
       };
 
       peerConnectionsRef.current.set(peerId, peerConnection);
@@ -161,6 +173,31 @@ const VoiceChat = ({ socketRef, roomId, username }) => {
     },
     [roomId, socketRef, isDeafened]
   );
+
+  // Clean up peer connection resources
+  const cleanupPeerConnection = (peerId) => {
+    const peerConnection = peerConnectionsRef.current.get(peerId);
+    if (peerConnection) {
+      peerConnection.close();
+      peerConnectionsRef.current.delete(peerId);
+    }
+
+    // Remove audio element
+    const audioElement = audioElementsRef.current.get(peerId);
+    if (audioElement) {
+      audioElement.remove();
+      audioElementsRef.current.delete(peerId);
+    }
+
+    // Clear pending candidates
+    pendingCandidatesRef.current.delete(peerId);
+
+    setConnectedPeers((prev) => {
+      const newPeers = new Map(prev);
+      newPeers.delete(peerId);
+      return newPeers;
+    });
+  };
 
   // End voice call
   const endVoiceCall = useCallback(() => {
@@ -174,17 +211,22 @@ const VoiceChat = ({ socketRef, roomId, username }) => {
       localStreamRef.current = null;
     }
 
+    // Close all peer connections
     peerConnectionsRef.current.forEach((pc, peerId) => {
       console.log(`Closing peer connection for ${peerId}`);
       pc.close();
     });
     peerConnectionsRef.current.clear();
 
+    // Remove all audio elements
     audioElementsRef.current.forEach((audio, peerId) => {
       console.log(`Removing audio element for ${peerId}`);
       audio.remove();
     });
     audioElementsRef.current.clear();
+
+    // Clear pending candidates
+    pendingCandidatesRef.current.clear();
 
     setIsCallActive(false);
     setConnectedPeers(new Map());
@@ -199,24 +241,25 @@ const VoiceChat = ({ socketRef, roomId, username }) => {
     }
   }, [roomId, socketRef, username]);
 
-  // Start voice call
+  // Start voice call with more compatible constraints
   const startVoiceCall = async () => {
     try {
       setIsConnecting(true);
       setConnectionStatus("connecting");
       console.log("Starting voice call...");
 
-      const stream = await navigator.mediaDevices.getUserMedia({
+      // More compatible constraints
+      const constraints = {
         audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-          sampleRate: 48000,
-          sampleSize: 16,
-          channelCount: 1,
+          echoCancellation: { ideal: true },
+          noiseSuppression: { ideal: true },
+          autoGainControl: { ideal: true },
+          // Removed sampleRate and sampleSize constraints for better compatibility
         },
-      });
+        video: false,
+      };
 
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
       console.log("Got user media stream:", stream.getAudioTracks());
       localStreamRef.current = stream;
       setIsCallActive(true);
@@ -289,7 +332,7 @@ const VoiceChat = ({ socketRef, roomId, username }) => {
     }
   };
 
-  // Handle socket events
+  // Handle socket events with improved error handling
   useEffect(() => {
     if (!socketRef.current) {
       console.log("Socket not available");
@@ -340,6 +383,7 @@ const VoiceChat = ({ socketRef, roomId, username }) => {
             });
           } catch (error) {
             console.error("Error creating offer:", error);
+            cleanupPeerConnection(joiningSocketId);
           }
         }
       }
@@ -351,11 +395,28 @@ const VoiceChat = ({ socketRef, roomId, username }) => {
       if (isCallActive) {
         try {
           const peerConnection = createPeerConnection(from);
+
+          // Set remote description first
           await peerConnection.setRemoteDescription(
             new RTCSessionDescription(offer)
           );
           console.log(`Set remote description from ${from}`);
 
+          // Process any queued ICE candidates
+          const pendingCandidates =
+            pendingCandidatesRef.current.get(from) || [];
+          for (const candidate of pendingCandidates) {
+            try {
+              await peerConnection.addIceCandidate(
+                new RTCIceCandidate(candidate)
+              );
+            } catch (error) {
+              console.error("Error adding queued ICE candidate:", error);
+            }
+          }
+          pendingCandidatesRef.current.set(from, []);
+
+          // Create and send answer
           const answer = await peerConnection.createAnswer({
             offerToReceiveAudio: true,
             offerToReceiveVideo: false,
@@ -370,6 +431,7 @@ const VoiceChat = ({ socketRef, roomId, username }) => {
           });
         } catch (error) {
           console.error("Error handling voice offer:", error);
+          cleanupPeerConnection(from);
         }
       }
     };
@@ -384,27 +446,47 @@ const VoiceChat = ({ socketRef, roomId, username }) => {
             new RTCSessionDescription(answer)
           );
           console.log(`Set remote description answer from ${from}`);
+
+          // Process any queued ICE candidates
+          const pendingCandidates =
+            pendingCandidatesRef.current.get(from) || [];
+          for (const candidate of pendingCandidates) {
+            try {
+              await peerConnection.addIceCandidate(
+                new RTCIceCandidate(candidate)
+              );
+            } catch (error) {
+              console.error("Error adding queued ICE candidate:", error);
+            }
+          }
+          pendingCandidatesRef.current.set(from, []);
         } else {
           console.error(`No peer connection found for ${from}`);
         }
       } catch (error) {
         console.error("Error handling voice answer:", error);
+        cleanupPeerConnection(from);
       }
     };
 
-    // Handle ICE candidate
+    // Handle ICE candidate with queuing
     const handleIceCandidate = async ({ candidate, from }) => {
       console.log(`Received ICE candidate from ${from}`);
       try {
         const peerConnection = peerConnectionsRef.current.get(from);
-        if (peerConnection && peerConnection.remoteDescription) {
-          await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
-          console.log(`Added ICE candidate from ${from}`);
-        } else {
-          console.log(
-            `Queuing ICE candidate from ${from} - remote description not set yet`
-          );
-          // Could implement candidate queuing here if needed
+        if (peerConnection) {
+          if (peerConnection.remoteDescription) {
+            await peerConnection.addIceCandidate(
+              new RTCIceCandidate(candidate)
+            );
+            console.log(`Added ICE candidate from ${from}`);
+          } else {
+            console.log(`Queuing ICE candidate from ${from}`);
+            const pendingCandidates =
+              pendingCandidatesRef.current.get(from) || [];
+            pendingCandidates.push(candidate);
+            pendingCandidatesRef.current.set(from, pendingCandidates);
+          }
         }
       } catch (error) {
         console.error("Error adding ICE candidate:", error);
@@ -417,25 +499,7 @@ const VoiceChat = ({ socketRef, roomId, username }) => {
       socketId: leavingSocketId,
     }) => {
       console.log(`User ${leavingUser} left voice call`);
-
-      const peerConnection = peerConnectionsRef.current.get(leavingSocketId);
-      if (peerConnection) {
-        peerConnection.close();
-        peerConnectionsRef.current.delete(leavingSocketId);
-      }
-
-      // Remove audio element
-      const audioElement = audioElementsRef.current.get(leavingSocketId);
-      if (audioElement) {
-        audioElement.remove();
-        audioElementsRef.current.delete(leavingSocketId);
-      }
-
-      setConnectedPeers((prev) => {
-        const newPeers = new Map(prev);
-        newPeers.delete(leavingSocketId);
-        return newPeers;
-      });
+      cleanupPeerConnection(leavingSocketId);
     };
 
     // Handle mute status updates
