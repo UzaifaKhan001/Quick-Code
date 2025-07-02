@@ -7,6 +7,6 @@ export const initSocket = async () => {
         timeout: 10000,
         transports: ['websocket', 'polling']
     };
-    const serverUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
+    const serverUrl = process.env.REACT_APP_Backend_URL || 'https://quickcodefy.netlify.app/';
     return io(serverUrl, options);
 };

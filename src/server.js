@@ -87,7 +87,7 @@ io.on('connection', (socket) => {
 
     // WebRTC Voice Communication Handlers
     socket.on('voice-join', ({ roomId, username }) => {
-        console.log(`User ${username} joined voice call in room ${roomId}`);
+        console.log(User ${username} joined voice call in room ${roomId});
         
         // Initialize room voice participants if not exists
         if (!voiceParticipants.has(roomId)) {
@@ -117,7 +117,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('voice-leave', ({ roomId, username }) => {
-        console.log(`User ${username} left voice call in room ${roomId}`);
+        console.log(User ${username} left voice call in room ${roomId});
         
         const roomVoiceParticipants = voiceParticipants.get(roomId);
         if (roomVoiceParticipants) {
@@ -134,7 +134,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('voice-offer', ({ roomId, offer, to }) => {
-        console.log(`Voice offer from ${socket.id} to ${to}`);
+        console.log(Voice offer from ${socket.id} to ${to});
         io.to(to).emit('voice-offer', {
             offer,
             from: socket.id
@@ -142,7 +142,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('voice-answer', ({ roomId, answer, to }) => {
-        console.log(`Voice answer from ${socket.id} to ${to}`);
+        console.log(Voice answer from ${socket.id} to ${to});
         io.to(to).emit('voice-answer', {
             answer,
             from: socket.id
@@ -150,7 +150,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('voice-ice-candidate', ({ roomId, candidate, to }) => {
-        console.log(`ICE candidate from ${socket.id} to ${to}`);
+        console.log(ICE candidate from ${socket.id} to ${to});
         io.to(to).emit('voice-ice-candidate', {
             candidate,
             from: socket.id
@@ -158,7 +158,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('voice-mute-status', ({ roomId, username, isMuted }) => {
-        console.log(`User ${username} ${isMuted ? 'muted' : 'unmuted'} in room ${roomId}`);
+        console.log(User ${username} ${isMuted ? 'muted' : 'unmuted'} in room ${roomId});
         
         const roomVoiceParticipants = voiceParticipants.get(roomId);
         if (roomVoiceParticipants && roomVoiceParticipants.has(socket.id)) {
@@ -173,7 +173,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('voice-deafen-status', ({ roomId, username, isDeafened }) => {
-        console.log(`User ${username} ${isDeafened ? 'deafened' : 'undeafened'} in room ${roomId}`);
+        console.log(User ${username} ${isDeafened ? 'deafened' : 'undeafened'} in room ${roomId});
         
         const roomVoiceParticipants = voiceParticipants.get(roomId);
         if (roomVoiceParticipants && roomVoiceParticipants.has(socket.id)) {
@@ -215,7 +215,7 @@ io.on('connection', (socket) => {
     });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 10000;
 server.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(Server is running on port ${PORT});
 });
