@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import Codemirror from "codemirror";
 import "codemirror/lib/codemirror.css";
 import "codemirror/theme/dracula.css";
@@ -31,164 +31,135 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
   const [isExecuting, setIsExecuting] = useState(false);
   const [executionTime, setExecutionTime] = useState(null);
   const [executionStatus, setExecutionStatus] = useState(null);
-  const username = localStorage.getItem("username") || "User";
 
+  // Initialize editor and socket listeners
   useEffect(() => {
+    const socket = socketRef.current;
     let editor;
-    function init() {
-      if (!editorRef.current) {
-        editor = Codemirror.fromTextArea(
-          document.getElementById("realtimeEditor"),
-          {
-            mode: selectedLanguage.mode,
-            theme: "dracula",
-            autoCloseTags: true,
-            autoCloseBrackets: true,
-            lineNumbers: true,
-            lineWrapping: true,
-            foldGutter: true,
-            matchBrackets: true,
-            indentUnit: 4,
-            tabSize: 4,
-            indentWithTabs: false,
-          }
-        );
-        editorRef.current = editor;
-        editor.setSize(null, "100%");
-        editor.setValue(selectedLanguage.template);
-        editor.on("change", (instance, changes) => {
-          const { origin } = changes;
-          const code = instance.getValue();
-          onCodeChange(code);
-          if (origin !== "setValue") {
-            socketRef.current.emit(ACTIONS.CODE_CHANGE, {
-              roomId,
-              code,
-            });
-          }
-        });
-      }
+
+    // Initialize CodeMirror editor
+    if (!editorRef.current) {
+      editor = Codemirror.fromTextArea(
+        document.getElementById("realtimeEditor"),
+        {
+          mode: selectedLanguage.mode,
+          theme: "dracula",
+          autoCloseTags: true,
+          autoCloseBrackets: true,
+          lineNumbers: true,
+          lineWrapping: true,
+          foldGutter: true,
+          matchBrackets: true,
+          indentUnit: 4,
+          tabSize: 4,
+          indentWithTabs: false,
+        }
+      );
+      editorRef.current = editor;
+      editor.setValue(selectedLanguage.template || "");
+
+      // Handle local changes
+      editor.on("change", (instance, changes) => {
+        const { origin } = changes;
+        const code = instance.getValue();
+        onCodeChange(code);
+        if (origin !== "setValue" && socket) {
+          socket.emit(ACTIONS.CODE_CHANGE, { roomId, code });
+        }
+      });
     }
-    init();
+
+    // Socket event listeners
+    if (socket) {
+      const handleRemoteCodeChange = ({ code }) => {
+        if (
+          code !== null &&
+          editorRef.current &&
+          editorRef.current.getValue() !== code
+        ) {
+          const cursor = editorRef.current.getCursor();
+          editorRef.current.setValue(code);
+          editorRef.current.setCursor(cursor);
+        }
+      };
+
+      const handleInputChange = ({ input }) => {
+        setInput(input);
+      };
+
+      const handleLanguageChange = ({ language }) => {
+        setSelectedLanguage(language);
+        if (editorRef.current) {
+          editorRef.current.setOption("mode", language.mode);
+          const currentValue = editorRef.current.getValue();
+          if (
+            !currentValue.trim() ||
+            LANGUAGE_OPTIONS.some((lang) => lang.template === currentValue)
+          ) {
+            editorRef.current.setValue(language.template || "");
+          }
+        }
+      };
+
+      const handleCodeOutput = ({ output, executionTime, status }) => {
+        setOutput(output);
+        setExecutionTime(executionTime);
+        setExecutionStatus(status);
+        setIsExecuting(false);
+      };
+
+      socket.on(ACTIONS.CODE_CHANGE, handleRemoteCodeChange);
+      socket.on(ACTIONS.INPUT_CHANGE, handleInputChange);
+      socket.on(ACTIONS.LANGUAGE_CHANGE, handleLanguageChange);
+      socket.on(ACTIONS.CODE_OUTPUT, handleCodeOutput);
+
+      return () => {
+        socket.off(ACTIONS.CODE_CHANGE, handleRemoteCodeChange);
+        socket.off(ACTIONS.INPUT_CHANGE, handleInputChange);
+        socket.off(ACTIONS.LANGUAGE_CHANGE, handleLanguageChange);
+        socket.off(ACTIONS.CODE_OUTPUT, handleCodeOutput);
+      };
+    }
+
     return () => {
       if (editorRef.current) {
         editorRef.current.toTextArea();
         editorRef.current = null;
       }
     };
-  }, [onCodeChange, socketRef.current, roomId, selectedLanguage]);
+  }, [roomId, onCodeChange, socketRef, selectedLanguage.mode]);
 
-  useEffect(() => {
-    if (editorRef.current) {
-      editorRef.current.setOption("mode", selectedLanguage.mode);
-      const currentValue = editorRef.current.getValue();
-      const isDefaultTemplate = LANGUAGE_OPTIONS.some(
-        (lang) => lang.template === currentValue
-      );
-      if (isDefaultTemplate || !currentValue.trim()) {
-        editorRef.current.setValue(selectedLanguage.template);
-      }
-    }
-  }, [selectedLanguage]);
-
-  useEffect(() => {
-    if (socketRef.current) {
-      socketRef.current.on(ACTIONS.CODE_CHANGE, ({ code }) => {
-        if (code !== null && editorRef.current) {
-          editorRef.current.setValue(code);
+  const handleLanguageChange = useCallback(
+    (language) => {
+      setSelectedLanguage(language);
+      if (editorRef.current) {
+        editorRef.current.setOption("mode", language.mode);
+        const currentValue = editorRef.current.getValue();
+        if (
+          !currentValue.trim() ||
+          LANGUAGE_OPTIONS.some((lang) => lang.template === currentValue)
+        ) {
+          editorRef.current.setValue(language.template || "");
         }
-      });
-
-      socketRef.current.on(ACTIONS.INPUT_CHANGE, ({ input }) => {
-        setInput(input);
-      });
-
-      socketRef.current.on(ACTIONS.LANGUAGE_CHANGE, ({ language }) => {
-        setSelectedLanguage(language);
-        if (editorRef.current) {
-          editorRef.current.setOption("mode", language.mode);
-          // Only set template if editor is empty or has default template
-          const currentValue = editorRef.current.getValue();
-          const isDefaultTemplate = LANGUAGE_OPTIONS.some(
-            (lang) => lang.template === currentValue
-          );
-          if (isDefaultTemplate || !currentValue.trim()) {
-            editorRef.current.setValue(language.template);
-          }
-        }
-      });
-
-      // IMPORTANT: This ensures that when ANY user clicks 'Run Code',
-      // the output is broadcast to all users and everyone's output panel updates automatically.
-      socketRef.current.on(
-        ACTIONS.CODE_OUTPUT,
-        ({ output, executionTime, status }) => {
-          setOutput(output);
-          setExecutionTime(executionTime);
-          setExecutionStatus(status);
-          setIsExecuting(false);
-        }
-      );
-    }
-
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.off(ACTIONS.CODE_CHANGE);
-        socketRef.current.off(ACTIONS.INPUT_CHANGE);
-        socketRef.current.off(ACTIONS.LANGUAGE_CHANGE);
-        socketRef.current.off(ACTIONS.CODE_OUTPUT);
       }
-    };
-  }, [socketRef.current, roomId]); // Include dependencies to ensure proper re-initialization
+      socketRef.current?.emit(ACTIONS.LANGUAGE_CHANGE, { roomId, language });
+    },
+    [roomId, socketRef]
+  );
 
-  const handleLanguageChange = (language) => {
-    setSelectedLanguage(language);
-    if (editorRef.current) {
-      editorRef.current.setOption("mode", language.mode);
-      // Only set template if editor is empty or has default template
-      const currentValue = editorRef.current.getValue();
-      const isDefaultTemplate = LANGUAGE_OPTIONS.some(
-        (lang) => lang.template === currentValue
-      );
-      if (isDefaultTemplate || !currentValue.trim()) {
-        editorRef.current.setValue(language.template);
-      }
-    }
-    socketRef.current.emit(ACTIONS.LANGUAGE_CHANGE, {
-      roomId,
-      language,
-    });
-  };
+  const handleInputChange = useCallback(
+    (e) => {
+      const newInput = e.target.value;
+      setInput(newInput);
+      socketRef.current?.emit(ACTIONS.INPUT_CHANGE, {
+        roomId,
+        input: newInput,
+      });
+    },
+    [roomId, socketRef]
+  );
 
-  const handleInputChange = (e) => {
-    const newInput = e.target.value;
-    setInput(newInput);
-    socketRef.current.emit(ACTIONS.INPUT_CHANGE, {
-      roomId,
-      input: newInput,
-    });
-  };
-
-  const getStatusMessage = (statusId) => {
-    switch (statusId) {
-      case JUDGE0_STATUS.ACCEPTED:
-        return "✓ Execution successful";
-      case JUDGE0_STATUS.COMPILATION_ERROR:
-        return "✗ Compilation error";
-      case JUDGE0_STATUS.RUNTIME_ERROR:
-        return "✗ Runtime error";
-      case JUDGE0_STATUS.TIME_LIMIT_EXCEEDED:
-        return "⏱ Time limit exceeded";
-      case JUDGE0_STATUS.MEMORY_LIMIT_EXCEEDED:
-        return "💾 Memory limit exceeded";
-      case JUDGE0_STATUS.WRONG_ANSWER:
-        return "❌ Wrong answer";
-      default:
-        return "Execution completed";
-    }
-  };
-
-  const executeCode = async () => {
+  const executeCode = useCallback(async () => {
     if (!editorRef.current) return;
 
     setIsExecuting(true);
@@ -214,56 +185,42 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
       const data = await response.json();
 
       if (data.token) {
-        // Poll for results
         const result = await pollForResult(data.token);
         const executionTime = Date.now() - startTime;
 
-        let outputText = "";
-        let status = JUDGE0_STATUS.ACCEPTED;
-
-        if (result.stderr) {
-          outputText = result.stderr;
-          status = result.status?.id || JUDGE0_STATUS.RUNTIME_ERROR;
-        } else if (result.stdout) {
-          outputText = result.stdout;
-        } else {
-          outputText = "No output";
-        }
+        let outputText = result.stderr || result.stdout || "No output";
+        let status = result.stderr
+          ? result.status?.id || JUDGE0_STATUS.RUNTIME_ERROR
+          : JUDGE0_STATUS.ACCEPTED;
 
         setOutput(outputText);
         setExecutionTime(executionTime);
         setExecutionStatus(status);
         setIsExecuting(false);
 
-        // Emit output to other users
-        socketRef.current.emit(ACTIONS.CODE_OUTPUT, {
+        socketRef.current?.emit(ACTIONS.CODE_OUTPUT, {
           roomId,
           output: outputText,
           executionTime,
           status,
         });
-      } else {
-        throw new Error("No token received from Judge0 API");
       }
     } catch (error) {
-      console.error("Execution error:", error);
       setOutput(`Error: ${error.message}`);
       setExecutionStatus(JUDGE0_STATUS.INTERNAL_ERROR);
       setIsExecuting(false);
     }
-  };
+  }, [input, roomId, selectedLanguage.id, socketRef]);
 
-  const pollForResult = async (token) => {
-    let attempts = 0;
-
-    while (attempts < JUDGE0_CONFIG.MAX_POLLING_ATTEMPTS) {
+  const pollForResult = useCallback(async (token) => {
+    for (
+      let attempts = 0;
+      attempts < JUDGE0_CONFIG.MAX_POLLING_ATTEMPTS;
+      attempts++
+    ) {
       try {
         const response = await fetch(
           `${JUDGE0_CONFIG.API_URL}/submissions/${token}`,
@@ -274,29 +231,29 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
             },
           }
         );
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
         const data = await response.json();
-
-        if (data.status && data.status.id > 2) {
-          return data;
-        }
-
+        if (data.status?.id > 2) return data;
         await new Promise((resolve) =>
           setTimeout(resolve, JUDGE0_CONFIG.POLLING_INTERVAL)
         );
-        attempts++;
       } catch (error) {
         console.error("Polling error:", error);
-        attempts++;
       }
     }
-
     throw new Error("Execution timeout");
-  };
+  }, []);
+
+  const getStatusMessage = useCallback((statusId) => {
+    const statusMessages = {
+      [JUDGE0_STATUS.ACCEPTED]: "✓ Execution successful",
+      [JUDGE0_STATUS.COMPILATION_ERROR]: "✗ Compilation error",
+      [JUDGE0_STATUS.RUNTIME_ERROR]: "✗ Runtime error",
+      [JUDGE0_STATUS.TIME_LIMIT_EXCEEDED]: "⏱ Time limit exceeded",
+      [JUDGE0_STATUS.MEMORY_LIMIT_EXCEEDED]: "💾 Memory limit exceeded",
+      [JUDGE0_STATUS.WRONG_ANSWER]: "❌ Wrong answer",
+    };
+    return statusMessages[statusId] || "Execution completed";
+  }, []);
 
   return (
     <div className="editor-container">
@@ -320,15 +277,13 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
             ))}
           </select>
         </div>
-        <div className="button-group">
-          <button
-            className="run-button"
-            onClick={executeCode}
-            disabled={isExecuting}
-          >
-            {isExecuting ? "Running..." : "Run Code"}
-          </button>
-        </div>
+        <button
+          className="run-button"
+          onClick={executeCode}
+          disabled={isExecuting}
+        >
+          {isExecuting ? "Running..." : "Run Code"}
+        </button>
       </div>
 
       <div className="editor-main">
